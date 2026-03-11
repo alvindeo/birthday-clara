@@ -164,6 +164,54 @@ const GlobalStyles = () => (
       background: linear-gradient(to bottom, transparent, #c9a84c55, transparent);
       transform: translateX(-50%);
     }
+
+    /* ── PDF Export / Print Styles ── */
+    @media print {
+      @page {
+        margin: 0;
+        size: auto;
+      }
+      
+      /* Force body and root visibility */
+      body, html, #root, main {
+        display: block !important;
+        background-color: #000 !important;
+        color: #f5f0eb !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Hide non-printable items */
+      #pdf-button, #custom-cursor, .grain-overlay, .loading-screen, section:not(.printable-section), .particle {
+        display: none !important;
+      }
+
+      /* Re-ensure selected sections are shown */
+      #hero-section, #roadmap-section, #dinner-section, #dresscode-section, #thankyou-section {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        page-break-after: always !important;
+        min-height: 100vh !important;
+        position: relative !important;
+        background-color: #000 !important;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+
+      /* Special fix for Hero Image Parallax */
+      #hero-section img {
+        transform: none !important;
+      }
+      
+      .py-28, .py-40, .py-36 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+    }
     @media (max-width: 768px) {
       .timeline-line {
         left: 20px;
@@ -186,6 +234,74 @@ const GlobalStyles = () => (
     @media (max-width: 768px) {
       .font-cormorant-mobile-sm { font-size: 2.8rem !important; }
       .font-dm-mobile-xs { font-size: 0.6rem !important; }
+    }
+
+    /* ── Luxury Image Effects ── */
+    .luxury-img-wrapper {
+      position: relative;
+      overflow: hidden;
+      border-radius: 2px;
+      background: #000;
+      box-shadow: 0 10px 30px -15px rgba(0,0,0,0.5);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .luxury-img-wrapper::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.6s ease;
+    }
+
+    .luxury-img-wrapper:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px -20px rgba(201,168,76,0.15);
+    }
+
+    .gallery-img-core {
+      filter: grayscale(0.4) sepia(0.2) brightness(0.7) contrast(1.1);
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: scale(1.02);
+    }
+
+    .luxury-img-wrapper:hover .gallery-img-core {
+      filter: grayscale(0) sepia(0) brightness(0.95) contrast(1);
+      transform: scale(1.1);
+    }
+
+    /* Elegant Caption */
+    .luxury-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 3rem 1.5rem 1.5rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 3;
+    }
+
+    .luxury-img-wrapper:hover .luxury-caption {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Gold Inner Border on Hover */
+    .luxury-border {
+      position: absolute;
+      inset: 15px;
+      border: 1px solid rgba(201,168,76,0);
+      pointer-events: none;
+      z-index: 4;
+      transition: all 0.6s ease;
+    }
+
+    .luxury-img-wrapper:hover .luxury-border {
+      border-color: rgba(201,168,76,0.3);
+      inset: 20px;
     }
   `}</style>
 );
@@ -246,6 +362,61 @@ function CustomCursor() {
   }, []);
 
   return <div id="custom-cursor" ref={cursorRef} />;
+}
+
+/* ─────────────────────────────────────────
+   DOWNLOAD BUTTON
+───────────────────────────────────────── */
+function ExportButton() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 300);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <button
+      id="pdf-button"
+      onClick={handlePrint}
+      style={{
+        position: "fixed",
+        bottom: scrolled ? "30px" : "-100px",
+        right: "30px",
+        zIndex: 1000,
+        background: "rgba(201,168,76,0.9)",
+        color: "#0a0a0a",
+        border: "none",
+        padding: "12px 24px",
+        borderRadius: "2px",
+        fontSize: "0.75rem",
+        letterSpacing: "0.2em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+        cursor: "pointer",
+        transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-5px) scale(1.05)";
+        e.currentTarget.style.background = "#f5f0eb";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0) scale(1)";
+        e.currentTarget.style.background = "rgba(201,168,76,0.9)";
+      }}
+    >
+      <span style={{ fontSize: "1.2rem" }}>⬇</span> Export PDF
+    </button>
+  );
 }
 
 /* ─────────────────────────────────────────
@@ -361,7 +532,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-end overflow-hidden">
+    <section id="hero-section" className="printable-section relative min-h-screen flex items-end overflow-hidden">
       {/* Background Photo */}
       <div 
         className="absolute inset-0 z-0 scale-110"
@@ -547,29 +718,29 @@ function GalleryItem({ src, alt, className, delay = 0, comment }) {
       className={`reveal ${inView ? "in-view" : ""} ${className}`}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div
-        className="overflow-hidden rounded-sm group"
-        style={{
-          border: "1px solid rgba(201,168,76,0)",
-          transition: "border-color 0.5s ease, box-shadow 0.5s ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "rgba(201,168,76,0.6)";
-          e.currentTarget.style.boxShadow = "0 0 24px rgba(201,168,76,0.1)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "rgba(201,168,76,0)";
-          e.currentTarget.style.boxShadow = "none";
-        }}
-        data-hover
-      >
-        {/* GANTI FOTO: comment injected via prop */}
+      <div className="luxury-img-wrapper group" data-hover>
+        {/* The Image with filter */}
         <img
           src={src}
           alt={alt}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="gallery-img-core w-full h-full object-cover"
           style={{ display: "block", aspectRatio: "4/5" }}
         />
+
+        {/* Decorative Gold Border */}
+        <div className="luxury-border" />
+
+        {/* Caption */}
+        {comment && (
+          <div className="luxury-caption text-center">
+            <p className="font-dm text-[9px] tracking-[0.4em] uppercase text-[#c9a84c] mb-1">
+              Dear Clara
+            </p>
+            <p className="font-cormorant italic text-lg text-[#f5f0eb] leading-tight">
+              &quot;{comment}&quot;
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -618,47 +789,47 @@ function GallerySection() {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-3 md:gap-5 max-w-6xl mx-auto">
         {/* Photo 1: Featured Large */}
         <GalleryItem
-          src="https://picsum.photos/seed/memory1/800/1000"
+          src="/img/6.jpeg"
           alt="Memory 1"
           className="md:col-span-4 md:row-span-2"
           delay={0}
-          comment="GANTI FOTO: foto berdua 1"
+          comment="Foto berdua 1"
         />
         
         {/* Photo 2: Small Top Right */}
         <GalleryItem
-          src="https://picsum.photos/seed/memory2/600/600"
+          src="/img/2.jpeg"
           alt="Memory 2"
           className="md:col-span-2"
           delay={150}
-          comment="GANTI FOTO: foto berdua 2"
+          comment="Foto berdua 2"
         />
 
         {/* Photo 3: Small Bottom Right */}
         <GalleryItem
-          src="https://picsum.photos/seed/memory3/600/600"
+          src="/img/5.jpeg"
           alt="Memory 3"
           className="md:col-span-2"
           delay={300}
-          comment="GANTI FOTO: foto berdua 3"
+          comment="Foto berdua 3"
         />
 
         {/* Photo 4: Medium Bottom Left */}
         <GalleryItem
-          src="https://picsum.photos/seed/memory4/800/600"
+          src="/img/8.jpeg"
           alt="Memory 4"
           className="md:col-span-3"
           delay={450}
-          comment="GANTI FOTO: foto berdua 4"
+          comment="Foto berdua 4"
         />
 
         {/* Photo 5: Medium Bottom Right */}
         <GalleryItem
-          src="https://picsum.photos/seed/memory5/800/600"
+          src="/img/7.jpeg"
           alt="Memory 5"
           className="md:col-span-3"
           delay={600}
-          comment="GANTI FOTO: foto berdua 5"
+          comment="Foto berdua 5"
         />
       </div>
     </section>
@@ -685,7 +856,7 @@ const TIMELINE_ITEMS = [
     emoji: "🍽️",
     title: "Tune In Coffee Semarang",
     desc: "Makan malam spesial buatt hari yang spesial",
-    time: "19.00 WIB",
+    time: "20.00 WIB",
   },
   {
     emoji: "📷",
@@ -855,7 +1026,7 @@ function RoadmapSection() {
   const [titleRef, titleInView] = useInView(0.2);
 
   return (
-    <section style={{ background: "#0a0a0a" }} className="py-28 md:py-36 px-6">
+    <section id="roadmap-section" className="printable-section relative py-28 md:py-36 px-6" style={{ background: "#0a0a0a" }}>
       {/* Title */}
       <div
         ref={titleRef}
@@ -883,7 +1054,7 @@ function RoadmapSection() {
             margin: 0,
           }}
         >
-          Agenda Malem Ini 🗓️
+          Agenda Malem Nanti
         </h2>
       </div>
 
@@ -944,8 +1115,9 @@ function DinnerSection() {
 
   return (
     <section
+      id="dinner-section"
+      className="printable-section py-28 md:py-36 px-6"
       style={{ background: "#0f0f0f" }}
-      className="py-28 md:py-36 px-6"
     >
       <div
         ref={ref}
@@ -1023,7 +1195,7 @@ function DinnerSection() {
           >
             {[
               { icon: "📍", label: "Tune In Coffee, Semarang" },
-              { icon: "🕖", label: "19.00 WIB — jangan telat!" },
+              { icon: "🕖", label: "20.00 WIB — jangan telat!" },
               { icon: "🌆", label: "Openn kado" },
             ].map((d, i) => (
               <div
@@ -1050,19 +1222,37 @@ function DinnerSection() {
 }
 
 /* ─────────────────────────────────────────
+   DRESSCODE IMAGE COMPONENT
+───────────────────────────────────────── */
+function DresscodeImage({ src, alt, className }) {
+  return (
+    <div className={`luxury-img-wrapper group ${className}`} data-hover>
+      <img
+        src={src}
+        alt={alt}
+        className="gallery-img-core w-full h-full object-cover"
+        style={{ display: "block" }}
+      />
+      <div className="luxury-border" />
+      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700" />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────
    SECTION 6: DRESSCODE
 ───────────────────────────────────────── */
 function DresscodeSection() {
   const [ref, inView] = useInView(0.15);
 
   return (
-    <section style={{ background: "#0a0a0a" }} className="py-28 md:py-36 px-6 md:px-16">
+    <section id="dresscode-section" className="printable-section py-28 md:py-40 px-6 md:px-16 overflow-hidden" style={{ background: "#0a0a0a" }}>
       <div
         ref={ref}
         className={`reveal ${inView ? "in-view" : ""}`}
       >
         {/* Title block */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-20">
           <p
             className="font-dm"
             style={{
@@ -1088,91 +1278,84 @@ function DresscodeSection() {
             Dress The Night
           </h2>
           <p
-            className="font-cormorant"
-            style={{
-              fontStyle: "italic",
-              fontWeight: 300,
-              fontSize: "1.2rem",
-              color: "#c9a84c",
-            }}
+            className="font-cormorant italic text-xl text-[#c9a84c]"
           >
-            &ldquo;All Black Everything&rdquo;
+            &ldquo;Casual Earth Tone&rdquo;
           </p>
         </div>
 
-        {/* 2-col layout */}
-        <div className="flex flex-col md:flex-row gap-10 max-w-5xl mx-auto items-center">
-          {/* Photo */}
-          <div
-            className="w-full md:w-1/2 overflow-hidden rounded-sm group"
-            style={{
-              border: "1px solid rgba(201,168,76,0.15)",
-              position: "relative",
-            }}
-          >
-            {/* GANTI FOTO: dresscode couple hitam */}
-            <img
-              src="https://picsum.photos/seed/fashion/800/1000"
-              alt="Black dresscode"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              style={{ aspectRatio: "4/5", width: "100%" }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)",
-                pointerEvents: "none",
-              }}
-            />
+        {/* Layout Container */}
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+          
+          {/* Dual Image Composition (Modern Asymmetrical) */}
+          <div className="w-full lg:w-[55%] relative flex items-center justify-center">
+            {/* Background Shape / Glow (Subtle) */}
+            <div className="absolute -z-10 w-[120%] h-[120%] opacity-20 bg-[radial-gradient(circle,rgba(201,168,76,0.1)_0%,transparent_70%)] pointer-events-none" />
+
+            {/* Photo 1: Main (dresscode.jpeg) */}
+            <div className="relative z-10 w-[70%] sm:w-[55%] shadow-2xl transform hover:-rotate-1 transition-transform duration-700">
+               <DresscodeImage 
+                  src="/img/dresscode.jpeg" 
+                  alt="Dresscode Reference 1"
+                  className="aspect-[3/4]"
+               />
+            </div>
+
+            {/* Photo 2: Overlapping (dc.jpeg) */}
+            <div className="absolute -bottom-10 -right-2 sm:-right-8 z-20 w-[60%] sm:w-[45%] shadow-2xl transform hover:rotate-1 transition-transform duration-700">
+               <DresscodeImage 
+                  src="/img/dc.jpeg" 
+                  alt="Dresscode Reference 2"
+                  className="aspect-[4/5] border-[6px] border-[#0a0a0a]"
+               />
+            </div>
           </div>
 
-          {/* Text */}
-          <div className="w-full md:w-1/2 flex flex-col justify-center gap-6 text-center md:text-left">
+          {/* Text Content */}
+          <div className="w-full lg:w-[45%] flex flex-col gap-8 text-center lg:text-left">
             <div>
-              <div className="gold-line mx-auto md:mx-0" style={{ width: "50px", marginBottom: "1.5rem" }} />
+              <div className="gold-line mx-auto lg:mx-0" style={{ width: "60px", marginBottom: "2rem" }} />
               <p
                 className="font-cormorant"
                 style={{
                   fontWeight: 300,
-                  fontSize: "clamp(1.2rem, 2.5vw, 1.6rem)",
+                  fontSize: "clamp(1.25rem, 2.2vw, 1.7rem)",
                   lineHeight: 1.8,
                   color: "#f5f0ebcc",
                 }}
               >
-                Malem ini kita samaan yaa! Hitam &mdash; Simple, elegan, dan auto kerenn buat malm inii.
+                Malem ini kita pake baju santai aja yaa! Flannel, kaos putih, sama celana jeans &mdash; biar senadaa sama akuu.
               </p>
-              
             </div>
 
-            {/* Palette chips */}
-            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", WebkitJustifyContent: "center" }}>
+            {/* Palette */}
+            <div className="flex flex-wrap gap-5 justify-center lg:justify-start mt-4">
               {[
-                { color: "#0a0a0a", label: "Jet Black" },
-                { color: "#1a1a1a", label: "Charcoal" },
-                { color: "#2d2d2d", label: "Graphite" },
+                { color: "#A67B5B", label: "Cokelat Muda" },
+                { color: "#4B3621", label: "Cokelat Tua" },
+                { color: "#F5F5DC", label: "Krem/Beige" },
+                { color: "#333333", label: "Abu-abu" },
+                { color: "#4a76a8", label: "Biru Denim" },
               ].map((chip) => (
-                <div key={chip.color} className="md:block" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
+                <div key={chip.label} className="flex flex-col items-center gap-3">
                   <div
                     style={{
-                      width: "40px",
-                      height: "40px",
+                      width: "35px",
+                      height: "35px",
                       borderRadius: "50%",
                       background: chip.color,
-                      border: "1px solid rgba(201,168,76,0.4)",
+                      border: "1px solid rgba(201,168,76,0.3)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.4)"
                     }}
                   />
-                  <span
-                    className="font-dm"
-                    style={{ fontSize: "0.6rem", color: "#f5f0eb88", letterSpacing: "0.1em" }}
-                  >
+                  <span className="font-dm text-[9px] tracking-[0.2em] text-[#f5f0eb66] uppercase">
                     {chip.label}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="md:hidden h-10" /> {/* Extra spacing for mobile at bottom of section if needed, but let's rely on container padding */}
           </div>
+
         </div>
       </div>
     </section>
@@ -1187,8 +1370,9 @@ function ThankYouSection() {
 
   return (
     <section
+      id="thankyou-section"
+      className="printable-section flex flex-col items-center justify-center py-28 px-6 md:px-20 text-center relative overflow-hidden"
       style={{ background: "#050505", minHeight: "100vh" }}
-      className="flex flex-col items-center justify-center py-28 px-6 md:px-20 text-center relative overflow-hidden"
     >
       {/* Subtle background glow */}
       <div
@@ -1255,7 +1439,7 @@ function ThankYouSection() {
             marginBottom: "3.5rem",
           }}
         >
-          Makasiii sudaa ada buat akuu, Terima kasih sudah nmau berbagi waktu, canda, tawa, ceritaa. &mdash;
+          Makasiii sudaa ada buat akuu, Terima kasih sudah mau berbagi waktu, canda, tawa, ceritaa. &mdash;
         kamu alasan akuu bisa tumbuh, bisa jadi lebih baik, bisa jadi lebih hebat.
         Selamat ulang tahun, sayang. Dari pacarmuu.
         </p>
@@ -1311,6 +1495,7 @@ export default function App() {
       <GlobalStyles />
       <div className="grain-overlay" />
       <CustomCursor />
+      <ExportButton />
 
       <LoadingScreen onDone={handleLoadingDone} />
 
