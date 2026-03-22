@@ -165,53 +165,7 @@ const GlobalStyles = () => (
       transform: translateX(-50%);
     }
 
-    /* ── PDF Export / Print Styles ── */
-    @media print {
-      @page {
-        margin: 0;
-        size: auto;
-      }
-      
-      /* Force body and root visibility */
-      body, html, #root, main {
-        display: block !important;
-        background-color: #000 !important;
-        color: #f5f0eb !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
 
-      /* Hide non-printable items */
-      #pdf-button, #custom-cursor, .grain-overlay, .loading-screen, section:not(.printable-section), .particle {
-        display: none !important;
-      }
-
-      /* Re-ensure selected sections are shown */
-      #hero-section, #roadmap-section, #dinner-section, #dresscode-section, #thankyou-section {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        page-break-after: always !important;
-        min-height: 100vh !important;
-        position: relative !important;
-        background-color: #000 !important;
-      }
-
-      .reveal {
-        opacity: 1 !important;
-        transform: none !important;
-        transition: none !important;
-      }
-
-      /* Special fix for Hero Image Parallax */
-      #hero-section img {
-        transform: none !important;
-      }
-      
-      .py-28, .py-40, .py-36 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
-    }
     @media (max-width: 768px) {
       .timeline-line {
         left: 20px;
@@ -365,60 +319,7 @@ function CustomCursor() {
 }
 
 
-/* ─────────────────────────────────────────
-   DOWNLOAD BUTTON
-───────────────────────────────────────── */
-function ExportButton() {
-  const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 300);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  return (
-    <button
-      id="pdf-button"
-      onClick={handlePrint}
-      style={{
-        position: "fixed",
-        bottom: scrolled ? "30px" : "-100px",
-        right: "30px",
-        zIndex: 1000,
-        background: "rgba(201,168,76,0.9)",
-        color: "#0a0a0a",
-        border: "none",
-        padding: "12px 24px",
-        borderRadius: "2px",
-        fontSize: "0.75rem",
-        letterSpacing: "0.2em",
-        textTransform: "uppercase",
-        fontWeight: 600,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-        cursor: "pointer",
-        transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-5px) scale(1.05)";
-        e.currentTarget.style.background = "#f5f0eb";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0) scale(1)";
-        e.currentTarget.style.background = "rgba(201,168,76,0.9)";
-      }}
-    >
-      <span style={{ fontSize: "1.2rem" }}>⬇</span> Export PDF
-    </button>
-  );
-}
 
 /* ─────────────────────────────────────────
    LOADING SCREEN
@@ -1496,7 +1397,6 @@ export default function App() {
       <GlobalStyles />
       <div className="grain-overlay" />
       <CustomCursor />
-      <ExportButton />
 
       <LoadingScreen onDone={handleLoadingDone} />
 
