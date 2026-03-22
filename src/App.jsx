@@ -165,12 +165,59 @@ const GlobalStyles = () => (
       transform: translateX(-50%);
     }
 
-      @media (max-width: 768px) {
-        .timeline-line {
-          left: 20px;
-          transform: none;
-        }
+    /* ── PDF Export / Print Styles ── */
+    @media print {
+      @page {
+        margin: 0;
+        size: auto;
       }
+      
+      /* Force body and root visibility */
+      body, html, #root, main {
+        display: block !important;
+        background-color: #000 !important;
+        color: #f5f0eb !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Hide non-printable items */
+      #pdf-button, #custom-cursor, .grain-overlay, .loading-screen, section:not(.printable-section), .particle {
+        display: none !important;
+      }
+
+      /* Re-ensure selected sections are shown */
+      #hero-section, #roadmap-section, #dinner-section, #dresscode-section, #thankyou-section {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        page-break-after: always !important;
+        min-height: 100vh !important;
+        position: relative !important;
+        background-color: #000 !important;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+
+      /* Special fix for Hero Image Parallax */
+      #hero-section img {
+        transform: none !important;
+      }
+      
+      .py-28, .py-40, .py-36 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+    }
+    @media (max-width: 768px) {
+      .timeline-line {
+        left: 20px;
+        transform: none;
+      }
+    }
     /* ── Grain Overlay ── */
     .grain-overlay {
       position: fixed;
@@ -319,6 +366,61 @@ function CustomCursor() {
 
 
 /* ─────────────────────────────────────────
+   DOWNLOAD BUTTON
+───────────────────────────────────────── */
+function ExportButton() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 300);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <button
+      id="pdf-button"
+      onClick={handlePrint}
+      style={{
+        position: "fixed",
+        bottom: scrolled ? "30px" : "-100px",
+        right: "30px",
+        zIndex: 1000,
+        background: "rgba(201,168,76,0.9)",
+        color: "#0a0a0a",
+        border: "none",
+        padding: "12px 24px",
+        borderRadius: "2px",
+        fontSize: "0.75rem",
+        letterSpacing: "0.2em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+        cursor: "pointer",
+        transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-5px) scale(1.05)";
+        e.currentTarget.style.background = "#f5f0eb";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0) scale(1)";
+        e.currentTarget.style.background = "rgba(201,168,76,0.9)";
+      }}
+    >
+      <span style={{ fontSize: "1.2rem" }}>⬇</span> Export PDF
+    </button>
+  );
+}
+
+/* ─────────────────────────────────────────
    LOADING SCREEN
 ───────────────────────────────────────── */
 function LoadingScreen({ onDone }) {
@@ -376,7 +478,7 @@ function LoadingScreen({ onDone }) {
             opacity: 0,
           }}
         >
-          28 · 03 · 2026
+          29 · 03 · 2026
         </p>
       </div>
     </div>
@@ -431,7 +533,7 @@ function HeroSection() {
   }, []);
 
   return (
-    <section id="hero-section" className="relative min-h-screen flex items-end overflow-hidden">
+    <section id="hero-section" className="printable-section relative min-h-screen flex items-end overflow-hidden">
       {/* Background Photo */}
       <div 
         className="absolute inset-0 z-0 scale-110"
@@ -463,7 +565,7 @@ function HeroSection() {
             animationFillMode: "forwards",
           }}
         >
-          28 Maret 2006 &mdash; 28 Maret 2026
+          29 Maret 2006 &mdash; 29 Maret 2026
         </p>
 
         {/* Name */}
@@ -584,7 +686,7 @@ function MessageSection() {
           dan selalu bahagia seperti senyummu yang nggak pernah gagal bikin
           hari-hariku lebih hangat. Dua puluh tahun dunia mengenalmu, dan aku
           merasa sangat beruntung bisa jadi salah satu yang ada di sisimu. */}
-          Selamat ulang tahun sayanggg, Hari ini kamuu duaa resmii menginjak 
+          Selamat ulang tahun sayanggg, Hari ini kamuu udaah resmii menginjak 
         dii 20 tahunn!!! yeyyy &mdash; sebuah angka yang besar, tapi aku tauu
         kamuu lebihh siap lagii. Semoga di umur yang bertambah ini kamu selalu sehat,
         dalam penyertaan Tuhan, selalu sabarr, tambah dewasa, jadii anak yang akan
@@ -925,7 +1027,7 @@ function RoadmapSection() {
   const [titleRef, titleInView] = useInView(0.2);
 
   return (
-    <section id="roadmap-section" className="relative py-28 md:py-36 px-6" style={{ background: "#0a0a0a" }}>
+    <section id="roadmap-section" className="printable-section relative py-28 md:py-36 px-6" style={{ background: "#0a0a0a" }}>
       {/* Title */}
       <div
         ref={titleRef}
@@ -1015,7 +1117,7 @@ function DinnerSection() {
   return (
     <section
       id="dinner-section"
-      className="py-28 md:py-36 px-6"
+      className="printable-section py-28 md:py-36 px-6"
       style={{ background: "#0f0f0f" }}
     >
       <div
@@ -1145,7 +1247,7 @@ function DresscodeSection() {
   const [ref, inView] = useInView(0.15);
 
   return (
-    <section id="dresscode-section" className="py-28 md:py-40 px-6 md:px-16 overflow-hidden" style={{ background: "#0a0a0a" }}>
+    <section id="dresscode-section" className="printable-section py-28 md:py-40 px-6 md:px-16 overflow-hidden" style={{ background: "#0a0a0a" }}>
       <div
         ref={ref}
         className={`reveal ${inView ? "in-view" : ""}`}
@@ -1270,7 +1372,7 @@ function ThankYouSection() {
   return (
     <section
       id="thankyou-section"
-      className="flex flex-col items-center justify-center py-28 px-6 md:px-20 text-center relative overflow-hidden"
+      className="printable-section flex flex-col items-center justify-center py-28 px-6 md:px-20 text-center relative overflow-hidden"
       style={{ background: "#050505", minHeight: "100vh" }}
     >
       {/* Subtle background glow */}
@@ -1372,7 +1474,7 @@ function ThankYouSection() {
             color: "#f5f0eb33",
           }}
         >
-          28 · 03 · 2026 &nbsp;✦&nbsp; Semarang
+          29 · 03 · 2026 &nbsp;✦&nbsp; Semarang
         </p>
       </div>
     </section>
@@ -1394,6 +1496,7 @@ export default function App() {
       <GlobalStyles />
       <div className="grain-overlay" />
       <CustomCursor />
+      <ExportButton />
 
       <LoadingScreen onDone={handleLoadingDone} />
 
